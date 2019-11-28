@@ -93,3 +93,9 @@ class PID:
         Based on a pre-determined sampe time, the PID decides if it should compute or return immediately.
         """
         self.sample_time = sample_time
+        
+    def getDeltaTime(self):
+        return self.delta_time
+    
+    def getError(self):
+        return self.error
