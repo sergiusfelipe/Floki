@@ -38,21 +38,21 @@ PWM3.start(0)
 PWM4.start(0)
 
 
-# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de ré
+# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de re
 def backward(velocity):
     PWM1.ChangeDutyCycle(velocity)
     GPIO.output(int2, GPIO.LOW)
     PWM3.ChangeDutyCycle(velocity)
     GPIO.output(int4, GPIO.LOW)
 
-# Assim como na funcao anterior, a entrada se dá pelo valor do PID só que movendo os motores no sentido contrário
+# Assim como na funcao anterior, a entrada se da pelo valor do PID so que movendo os motores no sentido contrario
 def forward(velocity):
     GPIO.output(int1, GPIO.LOW)
     PWM2.ChangeDutyCycle(velocity)
     GPIO.output(int3, GPIO.LOW)
     PWM4.ChangeDutyCycle(velocity)
 
-# Para caso o valor do PID for 0, ou seja, o robo está em equilibrio
+# Para caso o valor do PID for 0, ou seja, o robo esta em equilibrio
 def equilibrium():
     GPIO.output(int1, False)
     GPIO.output(int2, False)
@@ -138,21 +138,21 @@ while True:
     pid.update(last_y)
     PIDy = pid.output
 
-    # Se PIDy < 0 entao o sentido dos motores será de ré
+    # Se PIDy < 0 entao o sentido dos motores sera de re
     if PIDy < 0.0:
         print(PIDy)
         if PIDy < -100:
             PIDy = -100
         backward(-float(PIDy))
         #StepperFor(-PIDy)
-    # Se PIDy > entao o sentido dos motores será frente
+    # Se PIDy > entao o sentido dos motores sera frente
     elif PIDy > 0.0:
         print(PIDy)
         if PIDy > 100:
             PIDy = 100
         forward(float(PIDy))
         #StepperBACK(PIDy)
-    # E no caso de PIDy = 0 então o robo está em equilíbrio 
+    # E no caso de PIDy = 0 entao o robo esta em equilibrio 
     else:
         equilibrium()
 
