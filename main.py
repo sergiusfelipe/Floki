@@ -158,4 +158,5 @@ while True:
 
 
     print(int(last_y), 'PID: ', int(PIDy))
+    print(pid.getDeltaTime())
     sleep(0.02)
