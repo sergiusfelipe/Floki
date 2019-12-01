@@ -1,5 +1,3 @@
-'''HARIOMHARIBOLJAIMATAJIPITAJIKIJAIJAI'''
-
 # Algoritmo para equilibrio do floki
 
 # Importando todas as bibliotedas e classes necessarias
@@ -38,21 +36,21 @@ PWM3.start(0)
 PWM4.start(0)
 
 
-# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de re
+# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de ré
 def backward(velocity):
     PWM1.ChangeDutyCycle(velocity)
     GPIO.output(int2, GPIO.LOW)
     PWM3.ChangeDutyCycle(velocity)
     GPIO.output(int4, GPIO.LOW)
 
-# Assim como na funcao anterior, a entrada se da pelo valor do PID so que movendo os motores no sentido contrario
+# Assim como na funcao anterior, a entrada se dá pelo valor do PID só que movendo os motores no sentido contrário
 def forward(velocity):
     GPIO.output(int1, GPIO.LOW)
     PWM2.ChangeDutyCycle(velocity)
     GPIO.output(int3, GPIO.LOW)
     PWM4.ChangeDutyCycle(velocity)
 
-# Para caso o valor do PID for 0, ou seja, o robo esta em equilibrio
+# Para caso o valor do PID for 0, ou seja, o robo está em equilibrio
 def equilibrium():
     GPIO.output(int1, False)
     GPIO.output(int2, False)
@@ -102,6 +100,12 @@ gyro_offset_y = gTempY
 gyro_total_x = (last_x) - gyro_offset_x
 gyro_total_y = (last_y) - gyro_offset_y
 
+# Inicializa o controlador
+pid = PID.PID(P=1.5, I=1.0, D=0.001)
+last_pidy = 0
+last_deltatime = 0
+t_i = 0
+t_f = 0
 
 # O loop principal do algoritmo onde sera feita todo o o controle de equilibrio do robo
 while True:
@@ -131,12 +135,12 @@ while True:
     # Filtro Complementar de Shane Colton
     last_y = K * (last_y + gyro_y_delta) + (K1 * rotation_y)
 
-    # Inicializando o controlador PID juntamente com suas constantes
-    pid = PID.PID(P=1.5, I=1.0, D=0.001)
-    pid.SetPoint(10)
+    # Inicializando alguns parametros do controlador
+   
+    pid.Setpoint(10)
     pid.setSampleTime(0.02)
     pid.update(last_y)
-    PIDy = pid.output
+    PIDy = pid.output()
 
     # Se PIDy < 0 entao o sentido dos motores sera de re
     if PIDy < 0.0:
@@ -152,11 +156,23 @@ while True:
             PIDy = 100
         forward(float(PIDy))
         #StepperBACK(PIDy)
-    # E no caso de PIDy = 0 entao o robo esta em equilibrio 
+    # E no caso de PIDy = 0 então o robo está em equilíbrio 
     else:
         equilibrium()
 
+    if last_pidy == 200 and PIDy < last_pidy:
+        t_i = last_deltatime
+
+    elif last_pidy < PIDy and PIDy == 200 and t_i != 0:
+        t_f = pid.getDeltaTime()
+
+    elif t_i != 0 and t_f != 0:
+        p_cr = t_f - t_i
+        print(p_cr)
+        t_i = 0 
+        t_f = 0  
 
     print(int(last_y), 'PID: ', int(PIDy))
-    print(pid.getDeltaTime())
+    last_pidy = PIDy
+    last_deltatime = pid.getDeltaTime()
     sleep(0.02)
