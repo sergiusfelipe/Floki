@@ -32,22 +32,16 @@ class PID:
         self.output = 0.0
 
     def update(self, feedback_value, current_time=None):
-        """Calculates PID value for given reference feedback
-        .. math::
-            u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
-        .. figure:: images/pid_1.png
-           :align:   center
-           Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
-        """
-        error = self.SetPoint - feedback_value
+
+        self.error = self.SetPoint - feedback_value
 
         self.current_time = current_time if current_time is not None else time.time()
-        delta_time = self.current_time - self.last_time
-        delta_error = error - self.last_error
+        self.delta_time = self.current_time - self.last_time
+        delta_error = self.error - self.last_error
 
-        if (delta_time >= self.sample_time):
-            self.PTerm = self.Kp * error
-            self.ITerm += error * delta_time
+        if (self.delta_time >= self.sample_time):
+            self.PTerm = self.Kp * self.error
+            self.ITerm += self.error * self.delta_time
 
             if (self.ITerm < -self.windup_guard):
                 self.ITerm = -self.windup_guard
@@ -55,12 +49,12 @@ class PID:
                 self.ITerm = self.windup_guard
 
             self.DTerm = 0.0
-            if delta_time > 0:
-                self.DTerm = delta_error / delta_time
+            if self.delta_time > 0:
+                self.DTerm = delta_error / self.delta_time
 
             # Remember last time and last error for next calculation
             self.last_time = self.current_time
-            self.last_error = error
+            self.last_error = self.error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
 
@@ -93,9 +87,12 @@ class PID:
         Based on a pre-determined sampe time, the PID decides if it should compute or return immediately.
         """
         self.sample_time = sample_time
-        
+
     def getDeltaTime(self):
         return self.delta_time
     
     def getError(self):
         return self.error
+
+    def Setpoint(self, setpoint):
+        self.SetPoint = setpoint
