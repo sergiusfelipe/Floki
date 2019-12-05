@@ -100,8 +100,35 @@ gyro_offset_y = gTempY
 gyro_total_x = (last_x) - gyro_offset_x
 gyro_total_y = (last_y) - gyro_offset_y
 
+accel_data = sensor.get_accel_data()
+gyro_data = sensor.get_gyro_data()
+
+accelX = accel_data['x']
+accelY = accel_data['y']
+accelZ = accel_data['z']
+
+gyroX = gyro_data['x']
+gyroY = gyro_data['y']
+gyroZ = gyro_data['z']
+
+gyroX -= gyro_offset_x
+gyroY -= gyro_offset_y
+
+gyro_x_delta = (gyroX * time_diff)
+gyro_y_delta = (gyroY * time_diff)
+
+gyro_total_x += gyro_x_delta
+gyro_total_y += gyro_y_delta
+
+rotation_x = x_rotation(accelX, accelY, accelZ)
+rotation_y = y_rotation(accelX, accelY, accelZ)
+    
+    # Filtro Complementar de Shane Colton
+last_y = K * (last_y + gyro_y_delta) + (K1 * rotation_y)
+
 # Inicializa o controlador
-pid = PID.PID(P=1.5, I=1.0, D=0.001)
+pid = PID.PID(P=20, I=0, D=0)
+pid.Setpoint(int(last_y))
 last_pidy = 0
 last_deltatime = 0
 t_i = 0
@@ -137,7 +164,6 @@ while True:
 
     # Inicializando alguns parametros do controlador
    
-    pid.Setpoint(10)
     pid.setSampleTime(0.02)
     pid.update(last_y)
     PIDy = pid.output()
@@ -160,19 +186,17 @@ while True:
     else:
         equilibrium()
 
-    if last_pidy == 200 and PIDy < last_pidy:
+    if last_pidy == 100 and PIDy < last_pidy:
         t_i = last_deltatime
 
-    elif last_pidy < PIDy and PIDy == 200 and t_i != 0:
-        t_f = pid.getDeltaTime()
-
-    elif t_i != 0 and t_f != 0:
+    elif last_pidy < PIDy and PIDy == 100 and t_i != 0:
+        t_f = float(pid.getCurrentTime()
         p_cr = t_f - t_i
-        print(p_cr)
+        print("Periodo critico: "p_cr)
         t_i = 0 
         t_f = 0  
 
     print(int(last_y), 'PID: ', int(PIDy))
     last_pidy = PIDy
-    last_deltatime = pid.getDeltaTime()
+    last_deltatime = float(pid.getCurrentTime())
     sleep(0.02)
