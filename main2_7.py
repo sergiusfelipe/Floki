@@ -36,21 +36,21 @@ PWM3.start(0)
 PWM4.start(0)
 
 
-# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de ré
+# Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de re
 def backward(velocity):
     PWM1.ChangeDutyCycle(velocity)
     GPIO.output(int2, GPIO.LOW)
     PWM3.ChangeDutyCycle(velocity)
     GPIO.output(int4, GPIO.LOW)
 
-# Assim como na funcao anterior, a entrada se dá pelo valor do PID só que movendo os motores no sentido contrário
+# Assim como na funcao anterior, a entrada se da pelo valor do PID so que movendo os motores no sentido contrario
 def forward(velocity):
     GPIO.output(int1, GPIO.LOW)
     PWM2.ChangeDutyCycle(velocity)
     GPIO.output(int3, GPIO.LOW)
     PWM4.ChangeDutyCycle(velocity)
 
-# Para caso o valor do PID for 0, ou seja, o robo está em equilibrio
+# Para caso o valor do PID for 0, ou seja, o robo esta em equilibrio
 def equilibrium():
     GPIO.output(int1, False)
     GPIO.output(int2, False)
@@ -59,7 +59,7 @@ def equilibrium():
 
 
 sensor = mpu6050(0x68)
-# K e K1 --> COnstantes para o Filtro Complementar de Shane Colton
+# K e K1 --> Constantes para o Filtro Complementar de Shane Colton
 K = 0.98
 K1 = 1 - K
 
@@ -182,7 +182,7 @@ while True:
             PIDy = 100
         forward(float(PIDy))
         #StepperBACK(PIDy)
-    # E no caso de PIDy = 0 então o robo está em equilíbrio 
+    # E no caso de PIDy = 0 entao o robo esta em equilibrio 
     else:
         equilibrium()
 
