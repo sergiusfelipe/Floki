@@ -96,3 +96,6 @@ class PID:
 
     def Setpoint(self, setpoint):
         self.SetPoint = setpoint
+        
+    def getCurrentTime(self):
+        return self.current_time
