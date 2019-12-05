@@ -100,35 +100,10 @@ gyro_offset_y = gTempY
 gyro_total_x = (last_x) - gyro_offset_x
 gyro_total_y = (last_y) - gyro_offset_y
 
-accel_data = sensor.get_accel_data()
-gyro_data = sensor.get_gyro_data()
-
-accelX = accel_data['x']
-accelY = accel_data['y']
-accelZ = accel_data['z']
-
-gyroX = gyro_data['x']
-gyroY = gyro_data['y']
-gyroZ = gyro_data['z']
-
-gyroX -= gyro_offset_x
-gyroY -= gyro_offset_y
-
-gyro_x_delta = (gyroX * time_diff)
-gyro_y_delta = (gyroY * time_diff)
-
-gyro_total_x += gyro_x_delta
-gyro_total_y += gyro_y_delta
-
-rotation_x = x_rotation(accelX, accelY, accelZ)
-rotation_y = y_rotation(accelX, accelY, accelZ)
-    
-    # Filtro Complementar de Shane Colton
-last_y = K * (last_y + gyro_y_delta) + (K1 * rotation_y)
 
 # Inicializa o controlador
-pid = PID.PID(P=20, I=0, D=0)
-pid.Setpoint(int(last_y))
+pid = PID2_7.PID(P=20, I=0, D=0)
+pid.Setpoint(1.8)
 last_pidy = 0
 last_deltatime = 0
 t_i = 0
@@ -166,7 +141,7 @@ while True:
    
     pid.setSampleTime(0.02)
     pid.update(last_y)
-    PIDy = pid.output()
+    PIDy = pid.output
 
     # Se PIDy < 0 entao o sentido dos motores sera de re
     if PIDy < 0.0:
@@ -190,9 +165,9 @@ while True:
         t_i = last_deltatime
 
     elif last_pidy < PIDy and PIDy == 100 and t_i != 0:
-        t_f = float(pid.getCurrentTime()
+        t_f = float(pid.getCurrentTime())
         p_cr = t_f - t_i
-        print("Periodo critico: "p_cr)
+        print("Periodo critico: ",p_cr)
         t_i = 0 
         t_f = 0  
 
