@@ -5,18 +5,19 @@ from colorama import Fore, Back, Style
 from solution import solution
 import time
 import floki_3
+import csv
 
 
 
 
 
 
-def PSO(P, I, D, lb,ub,dim,pop):
+def PSO(P, I, D, lb,ub,dim,pop,ite):
 
 
     PID = [P, I, D]
     # PSO parameters
-    floki = FLOKI.FLOKI(P, I, D)
+    floki = floki_3.FLOKI(P, I, D)
     #    dim=30
     #    iters=200
     Vmax=6
@@ -56,7 +57,10 @@ def PSO(P, I, D, lb,ub,dim,pop):
     for i in range(dim):
         pos[:, i] = numpy.random.uniform(0,1, pop) * (ub[i] - lb[i]) + lb[i]
     
-    convergence_curve=[]
+    convergence_curve=numpy.zeros(ite)
+    kp_curve=numpy.zeros(ite)
+    ki_curve=numpy.zeros(ite)
+    kd_curve=numpy.zeros(ite)
     
     ############################################
     print("PSO is optimizing Floki")    
@@ -68,13 +72,13 @@ def PSO(P, I, D, lb,ub,dim,pop):
     #print("ub: ",ub)
     #print("pos: ",pos)
     
-    while True:
+    for l in range(0,ite):
         for i in range(0,PopSize):
             #pos[i,:]=checkBounds(pos[i,:],lb,ub)
             for j in range(dim):
                 pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])
             #Calculate objective function for each particle
-            fitness = floki.controle(pos[i,:])
+            fitness = floki.controle(pos[i,0],pos[i,1],pos[i,2])
     
             if(pBestScore[i]>fitness):
                 pBestScore[i]=fitness
@@ -83,9 +87,12 @@ def PSO(P, I, D, lb,ub,dim,pop):
             if(gBestScore>fitness):
                 gBestScore=fitness
                 gBest=pos[i,:].copy()
+                kp_curve[l]=pos[i,0].copy
+                ki_curve[l]=pos[i,1].copy
+                kd_curve[l]=pos[i,2].copy
         
         #Update the W of PSO
-        w=wMax-l*((wMax-wMin)/iters);
+        w=wMax-l*((wMax-wMin)/ite);
         
         for i in range(0,PopSize):
             for j in range (0,dim):
@@ -101,7 +108,7 @@ def PSO(P, I, D, lb,ub,dim,pop):
                             
                 pos[i,j]=pos[i,j]+vel[i,j]
         
-        convergence_curve.append(gBestScore)
+        convergence_curve[l]=gBestScore
       
         if (l%1==0):
                print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(gBestScore)]);
@@ -111,6 +118,29 @@ def PSO(P, I, D, lb,ub,dim,pop):
     s.convergence=convergence_curve
     s.optimizer="PSO"
     s.objfname="Floki"
+    s.kp_convergence = kp_curve
+    s.ki_convergence = ki_curve
+    s.kd_convergence = kd_curve
+    s.kp = kp_curve[-1]
+    s.ki = ki_curve[-1]
+    s.kd = kd_curve[-1]
 
+    return s
 
-pso = PSO(P, I, D, -1.5, 1.5, 3, 50)
+iters = 50
+pso = PSO(P, I, D, -1.5, 1.5, 3, 50, iters)
+Flag = False
+Export=True
+if(Export==True):
+    with open(ExportToFile, 'a',newline='\n') as out:
+        writer = csv.writer(out,delimiter=' ')
+        if (Flag==False): # just one time to write the header of the CSV file
+            for i in range(0,iters)
+                header= numpy.concatenate([i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]])
+                writer.writerow(header)
+    out.close()
+    Flag = True
+
+if Flag == True:
+    while True:
+        floki.controle(s.kp, s.ki, s.kd)
