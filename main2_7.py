@@ -4,7 +4,7 @@
 from mpu6050 import mpu6050
 from time import sleep
 import math
-import PID
+import PID2_7
 import  RPi.GPIO as GPIO
 
 
