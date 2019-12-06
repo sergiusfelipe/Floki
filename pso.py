@@ -130,9 +130,10 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 50
-pso = PSO(P, I, D, -0.5, 0.5, 3, 10, iters)
+iters = 25
+pso = PSO(P, I, D, -0.25, 0.25, 3, 10, iters)
 print("Otimizacao feita")
+ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
 Export=True
 if(Export==True):
