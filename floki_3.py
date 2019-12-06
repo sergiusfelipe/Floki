@@ -9,36 +9,55 @@ import RPi.GPIO as GPIO
 import time
 
 
+GPIO.setmode(GPIO.BCM) # Utilizando a pinagem no modo BCM 
+GPIO.setwarnings(False) # Desabilitando avisos
+
+        # Declarando os pino GPIO que serao utilizados
+int1 = 21
+int2 = 20
+int3 = 16
+int4 = 12
+
+GPIO.setup(self.int1, GPIO.OUT)
+GPIO.setup(self.int2, GPIO.OUT)
+GPIO.setup(self.int3, GPIO.OUT)
+GPIO.setup(self.int4, GPIO.OUT)
+
+        # Pulse width modulation: a velocidade muda de acordo com o angulo
+PWM1 = GPIO.PWM(21, 100)
+PWM2 = GPIO.PWM(20, 100)
+PWM3 = GPIO.PWM(16, 100)
+PWM4 = GPIO.PWM(12, 100)
+
+        # Da inicio aos PWM
+PWM1.start(0)
+PWM2.start(0)
+PWM3.start(0)
+PWM4.start(0)
+
+ def backward(velocity):
+        PWM1.ChangeDutyCycle(velocity)
+        GPIO.output(int2, GPIO.LOW)
+        PWM3.ChangeDutyCycle(velocity)
+        GPIO.output(int4, GPIO.LOW)
+
+    # Assim como na funcao anterior, a entrada se da pelo valor do PID so que movendo os motores no sentido contrario
+def forward(velocity):
+        GPIO.output(int1, GPIO.LOW)
+        PWM2.ChangeDutyCycle(velocity)
+        GPIO.output(int3, GPIO.LOW)
+        PWM4.ChangeDutyCycle(velocity)
+
+    # Para caso o valor do PID for 0, ou seja, o robo esta em equilibrio
+def equilibrium():
+        GPIO.output(int1, False)
+        GPIO.output(int2, False)
+        GPIO.output(int3, False)
+        GPIO.output(int4, False)
 
 class FLOKI:
 
-    def __init__(self, P, I, D):
-
-        GPIO.setmode(GPIO.BCM) # Utilizando a pinagem no modo BCM 
-        GPIO.setwarnings(False) # Desabilitando avisos
-
-        # Declarando os pino GPIO que serao utilizados
-        self.int1 = 21
-        self.int2 = 20
-        self.int3 = 16
-        self.int4 = 12
-
-        GPIO.setup(self.int1, GPIO.OUT)
-        GPIO.setup(self.int2, GPIO.OUT)
-        GPIO.setup(self.int3, GPIO.OUT)
-        GPIO.setup(self.int4, GPIO.OUT)
-
-        # Pulse width modulation: a velocidade muda de acordo com o angulo
-        global PWM1 = GPIO.PWM(21, 100)
-        global PWM2 = GPIO.PWM(20, 100)
-        global PWM3 = GPIO.PWM(16, 100)
-        global PWM4 = GPIO.PWM(12, 100)
-
-        # Da inicio aos PWM
-        PWM1.start(0)
-        PWM2.start(0)
-        PWM3.start(0)
-        PWM4.start(0)
+    def __init__(self, P, I, D, samples):
 
         self.sensor = mpu6050(0x68)
         # K e K1 --> COnstantes para o Filtro Complementar de Shane Colton
@@ -47,7 +66,7 @@ class FLOKI:
 
         self.time_diff = 0.02
         self.ITerm = 0
-
+        self.n_amostra = samples
         # Requisita os dados do MPU6050 
         accel_data = self.sensor.get_accel_data()
         gyro_data = self.sensor.get_gyro_data()
@@ -78,27 +97,6 @@ class FLOKI:
         t_f = 0
         self.tempo = time.time()
 
-        # Funcao que tem como argumento de entrada o valor obtido do PID, movendo os motores de re
-    def backward(sef, velocity):
-        PWM1.ChangeDutyCycle(velocity)
-        GPIO.output(self.int2, GPIO.LOW)
-        PWM3.ChangeDutyCycle(velocity)
-        GPIO.output(self.int4, GPIO.LOW)
-
-    # Assim como na funcao anterior, a entrada se da pelo valor do PID so que movendo os motores no sentido contrario
-    def forward(self, velocity):
-        GPIO.output(self.int1, GPIO.LOW)
-        PWM2.ChangeDutyCycle(velocity)
-        GPIO.output(self.int3, GPIO.LOW)
-        PWM4.ChangeDutyCycle(velocity)
-
-    # Para caso o valor do PID for 0, ou seja, o robo esta em equilibrio
-    def equilibrium(self):
-        GPIO.output(self.int1, False)
-        GPIO.output(self.int2, False)
-        GPIO.output(self.int3, False)
-        GPIO.output(self.int4, False)
-
     # Funcoes basicas de matematica que serao utilizados 
     def distance(self,a, b):
         return math.sqrt((a*a) + (b*b))
@@ -118,98 +116,67 @@ class FLOKI:
         self.pid.setKi(Ki)
         self.pid.setKd(Kd)
         pi = self.pid.getCurrentTime()
-        accel_data = self.sensor.get_accel_data()
-        gyro_data = self.sensor.get_gyro_data()
+        IAE = 0
+        
+        for i in range(0,self.n_amostra):
+            accel_data = self.sensor.get_accel_data()
+            gyro_data = self.sensor.get_gyro_data()
 
-        accelX = accel_data['x']
-        accelY = accel_data['y']
-        accelZ = accel_data['z']
+            accelX = accel_data['x']
+            accelY = accel_data['y']
+            accelZ = accel_data['z']
 
-        gyroX = gyro_data['x']
-        gyroY = gyro_data['y']
-        gyroZ = gyro_data['z']
+            gyroX = gyro_data['x']
+            gyroY = gyro_data['y']
+            gyroZ = gyro_data['z']
 
-        gyroX -= self.gyro_offset_x
-        gyroY -= self.gyro_offset_y
+            gyroX -= self.gyro_offset_x
+            gyroY -= self.gyro_offset_y
 
-        gyro_x_delta = (gyroX * self.time_diff)
-        gyro_y_delta = (gyroY * self.time_diff)
+            gyro_x_delta = (gyroX * self.time_diff)
+            gyro_y_delta = (gyroY * self.time_diff)
 
-        self.gyro_total_x += gyro_x_delta
-        self.gyro_total_y += gyro_y_delta
+            self.gyro_total_x += gyro_x_delta
+            self.gyro_total_y += gyro_y_delta
 
-        rotation_x = self.x_rotation(accelX, accelY, accelZ)
-        rotation_y = self.y_rotation(accelX, accelY, accelZ)
+            rotation_x = self.x_rotation(accelX, accelY, accelZ)
+            rotation_y = self.y_rotation(accelX, accelY, accelZ)
     
-    # Filtro Complementar de Shane Colton
-        first_y = self.K * (self.last_y + gyro_y_delta) + (self.K1 * rotation_y)
+            # Filtro Complementar de Shane Colton
+            first_y = self.K * (self.last_y + gyro_y_delta) + (self.K1 * rotation_y)
 
-    # Inicializando alguns parametros do controlador
+            # Inicializando alguns parametros do controlador
    
-        self.pid.Setpoint(0)
-        self.pid.setSampleTime(0.02)
-        self.pid.update(first_y)
-        PIDy = self.pid.output
+            self.pid.Setpoint(0)
+            self.pid.setSampleTime(0.02)
+            self.pid.update(first_y)
+            PIDy = self.pid.output
 
-    # Se PIDy < 0 entao o sentido dos motores sera de re
-        if PIDy < 0.0:
-            print(PIDy)
-            if PIDy < -100:
-                PIDy = -100
-            self.backward(-float(PIDy))
-        #StepperFor(-PIDy)
-    # Se PIDy > entao o sentido dos motores sera frente
-        elif PIDy > 0.0:
-            print(PIDy)
-            if PIDy > 100:
-                PIDy = 100
-            self.forward(float(PIDy))
-        #StepperBACK(PIDy)
-    # E no caso de PIDy = 0 entao o robo esta em equilibrio 
-        else:
-            self.equilibrium()
+            # Se PIDy < 0 entao o sentido dos motores sera de re
+            if PIDy < 0.0:
+                print(PIDy)
+                if PIDy < -100:
+                    PIDy = -100
+                self.backward(-float(PIDy))
+                #StepperFor(-PIDy)
+            # Se PIDy > entao o sentido dos motores sera frente
+            elif PIDy > 0.0:
+                print(PIDy)
+                if PIDy > 100:
+                    PIDy = 100
+                self.forward(float(PIDy))
+                #StepperBACK(PIDy)
+            # E no caso de PIDy = 0 entao o robo esta em equilibrio 
+            else:
+                self.equilibrium()
 
-        '''if last_pidy == 100 and PIDy < last_pidy:
-            t_i = float(pid.getCurrentTime())
+            print((int(first_y), 'PID: ', int(PIDy)))
+            last_pidy = PIDy
+            deltatime = self.pid.getCurrentTime() - pi
+            IAE += abs(self.pid.getError())*deltatime
+            pi = self.pid.getCurrentTime()
+            sleep(0.01)
+            
+        
 
-        elif last_pidy < PIDy and PIDy == 100 and t_i != 0:
-            t_f = pid.getCurrentTime()
-            p_cr = t_f - t_i
-            print(p_cr)
-            t_i = 0 
-            t_f = 0  '''
-
-        print((int(first_y), 'PID: ', int(PIDy)))
-        last_pidy = PIDy
-        sleep(0.02)
-
-        accel_data = self.sensor.get_accel_data()
-        gyro_data = self.sensor.get_gyro_data()
-
-        accelX = accel_data['x']
-        accelY = accel_data['y']
-        accelZ = accel_data['z']
-
-        gyroX = gyro_data['x']
-        gyroY = gyro_data['y']
-        gyroZ = gyro_data['z']
-
-        gyroX -= self.gyro_offset_x
-        gyroY -= self.gyro_offset_y
-
-        gyro_x_delta = (gyroX * self.time_diff)
-        gyro_y_delta = (gyroY * self.time_diff)
-
-        self.gyro_total_x += gyro_x_delta
-        self.gyro_total_y += gyro_y_delta
-
-        rotation_x = self.x_rotation(accelX, accelY, accelZ)
-        rotation_y = self.y_rotation(accelX, accelY, accelZ)
-    
-        # Filtro Complementar de Shane Colton
-        self.last_y = self.K * (self.last_y + gyro_y_delta) + (self.K1 * rotation_y)
-        pf = self.pid.getCurrentTime()
-        delta_erro =  self.pid.getError() - (self.pid.getSetpoint() - self.last_y)
-        delta_time = pf - pi
-
-        return abs(delta_erro)/delta_time
+        return IAE
