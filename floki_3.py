@@ -64,29 +64,29 @@ class FLOKI:
         self.K = 0.98
         self.K1 = 1 - self.K
 
-        self.time_diff = 0.02
+        self.time_diff = 0.01
         self.ITerm = 0
         self.n_amostra = samples
         # Requisita os dados do MPU6050 
-        accel_data = self.sensor.get_accel_data()
-        gyro_data = self.sensor.get_gyro_data()
+        self.accel_data = self.sensor.get_accel_data()
+        self.gyro_data = self.sensor.get_gyro_data()
 
-        aTempX = accel_data['x']
-        aTempY = accel_data['y']
-        aTempZ = accel_data['z']
+        aTempX = self.accel_data['x']
+        aTempY = self.accel_data['y']
+        aTempZ = self.accel_data['z']
 
-        gTempX = gyro_data['x']
-        gTempY = gyro_data['y']
-        gTempZ = gyro_data['z']
+        gTempX = self.gyro_data['x']
+        gTempY = self.gyro_data['y']
+        gTempZ = self.gyro_data['z']
 
         # Seta as posicoes iniciais do sensor
-        last_x = self.x_rotation(aTempX, aTempY, aTempZ)
+        self.last_x = self.x_rotation(aTempX, aTempY, aTempZ)
         self.last_y = self.y_rotation(aTempX, aTempY, aTempZ)
 
         self.gyro_offset_x = gTempX
         self.gyro_offset_y = gTempY
 
-        self.gyro_total_x = (last_x) - self.gyro_offset_x
+        self.gyro_total_x = (self.last_x) - self.gyro_offset_x
         self.gyro_total_y = (self.last_y) - self.gyro_offset_y
 
         # Inicializa o controlador
@@ -111,7 +111,7 @@ class FLOKI:
 
 # O loop principal do algoritmo onde sera feita todo o o controle de equilibrio do robo
     def controle(self, Kp, Ki, Kd):
-
+	
         self.pid.setKp(Kp)
         self.pid.setKi(Ki)
         self.pid.setKd(Kd)
@@ -119,16 +119,17 @@ class FLOKI:
         IAE = 0
         
         for i in range(0,self.n_amostra):
-            accel_data = self.sensor.get_accel_data()
-            gyro_data = self.sensor.get_gyro_data()
+	    
+            self.accel_data = self.sensor.get_accel_data()
+            self.gyro_data = self.sensor.get_gyro_data()
 
-            accelX = accel_data['x']
-            accelY = accel_data['y']
-            accelZ = accel_data['z']
+            accelX = self.accel_data['x']
+            accelY = self.accel_data['y']
+            accelZ = self.accel_data['z']
 
-            gyroX = gyro_data['x']
-            gyroY = gyro_data['y']
-            gyroZ = gyro_data['z']
+            gyroX = self.gyro_data['x']
+            gyroY = self.gyro_data['y']
+            gyroZ = self.gyro_data['z']
 
             gyroX -= self.gyro_offset_x
             gyroY -= self.gyro_offset_y
@@ -143,13 +144,13 @@ class FLOKI:
             rotation_y = self.y_rotation(accelX, accelY, accelZ)
     
             # Filtro Complementar de Shane Colton
-            first_y = self.K * (self.last_y + gyro_y_delta) + (self.K1 * rotation_y)
+            self.last_y = self.K * (self.last_y + gyro_y_delta) + (self.K1 * rotation_y)
 
             # Inicializando alguns parametros do controlador
    
             self.pid.Setpoint(0)
-            self.pid.setSampleTime(0.02)
-            self.pid.update(first_y)
+            self.pid.setSampleTime(0.01)
+            self.pid.update(self.last_y)
             PIDy = self.pid.output
 
             # Se PIDy < 0 entao o sentido dos motores sera de re
@@ -170,7 +171,7 @@ class FLOKI:
             else:
                 equilibrium()
 
-            print((int(first_y), 'PID: ', int(PIDy)))
+            print((int(self.last_y), 'PID: ', int(PIDy)))
             last_pidy = PIDy
             deltatime = self.pid.getCurrentTime() - pi
             IAE += abs(self.pid.getError())*deltatime

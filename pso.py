@@ -55,7 +55,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
 
     pos = numpy.zeros((pop, dim))
     for i in range(dim):
-        pos[:, i] = numpy.random.uniform(0,1, pop) * (ub[i] - lb[i]) + lb[i]
+        pos[:, i] = numpy.random.uniform(ub[i],lb[i], pop)
     
     convergence_curve=numpy.zeros(ite)
     kp_curve=numpy.zeros(ite)
@@ -78,7 +78,8 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
             for j in range(dim):
                 pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])
             #Calculate objective function for each particle
-            fitness = floki.controle(pos[i,0],pos[i,1],pos[i,2])
+#	    print(pos[i,:])
+            fitness = floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
     
             if(pBestScore[i]>fitness):
                 pBestScore[i]=fitness
@@ -126,11 +127,11 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
     s.kd = kd_curve[-1]
 
     return s
-P = 20
-I = 4.5
-D = 0.001
+P = 16.5
+I = 0.163
+D = 0.04075
 iters = 50
-pso = PSO(P, I, D, -1.5, 1.5, 3, 50, iters)
+pso = PSO(P, I, D, -0.5, 0.5, 3, 10, iters)
 print("Otimizacao feita")
 Flag = False
 Export=True
