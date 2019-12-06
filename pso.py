@@ -17,7 +17,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
 
     PID = [P, I, D]
     # PSO parameters
-    floki = floki_3.FLOKI(P, I, D, samples=3)
+    floki = floki_3.FLOKI(P, I, D)
     #    dim=30
     #    iters=200
     Vmax=6

@@ -63,7 +63,6 @@ class MPU6050:
         self.K1 = 1 - self.K
 
         self.time_diff = 0.01
-        self.n_amostra = samples
         # Requisita os dados do MPU6050 
         self.accel_data = self.sensor.get_accel_data()
         self.gyro_data = self.sensor.get_gyro_data()
@@ -131,7 +130,7 @@ class MPU6050:
 
 class FLOKI:
 
-    def __init__(self, P, I, D, samples):
+    def __init__(self, P, I, D):
 
         # Inicializa o controlador
         self.pid = PID_3.PID(P, I, D)
@@ -140,12 +139,9 @@ class FLOKI:
         t_i = 0
         t_f = 0
         self.tempo = time.time()
-        mpu5060 = MPU6050()
+        mpu6050 = MPU6050()
         self.pid.Setpoint(3.5)
-        self.pid.setSampleTime(0.01)
-
-    # Funcoes basicas de matematica que serao utilizados 
-
+        self.pid.setSampleTime(0.1)
 # O loop principal do algoritmo onde sera feita todo o o controle de equilibrio do robo
     def controle(self, Kp, Ki, Kd):
 
@@ -155,9 +151,9 @@ class FLOKI:
         pi = self.pid.getCurrentTime()
         IAE = 0
         
-        for i in range(0,self.n_amostra):
+        for i in range(0,3):
             # Inicializando alguns parametros do controlador
-            first_y = mpu6050.angulo()
+            first_y = mpu6050.angulo
             self.pid.update(first_y)
             PIDy = self.pid.output
 
