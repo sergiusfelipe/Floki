@@ -146,4 +146,4 @@ if(Export==True):
 
 if Flag == True:
     while True:
-        floki.controle(s.kp, s.ki, s.kd)
+        floki.controle(pso.kp, pso.ki, pso.kd)
