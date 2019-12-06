@@ -42,12 +42,12 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
     
     ######################## Initializations
     
-    vel=numpy.zeros((PopSize,dim))
+    vel=numpy.zeros((pop,dim))
     
-    pBestScore=numpy.zeros(PopSize) 
+    pBestScore=numpy.zeros(pop) 
     pBestScore.fill(float("inf"))
     
-    pBest=numpy.zeros((PopSize,dim))
+    pBest=numpy.zeros((pop,dim))
     gBest=numpy.zeros(dim)
     
     
@@ -73,7 +73,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
     #print("pos: ",pos)
     
     for l in range(0,ite):
-        for i in range(0,PopSize):
+        for i in range(0,pop):
             #pos[i,:]=checkBounds(pos[i,:],lb,ub)
             for j in range(dim):
                 pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])
@@ -87,9 +87,9 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
             if(gBestScore>fitness):
                 gBestScore=fitness
                 gBest=pos[i,:].copy()
-                kp_curve[l]=pos[i,0].copy
-                ki_curve[l]=pos[i,1].copy
-                kd_curve[l]=pos[i,2].copy
+                kp_curve[l]=pos[i,0]
+                ki_curve[l]=pos[i,1]
+                kd_curve[l]=pos[i,2]
         
         #Update the W of PSO
         w=wMax-l*((wMax-wMin)/ite);
@@ -126,16 +126,19 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
     s.kd = kd_curve[-1]
 
     return s
-
+P = 20
+I = 4.5
+D = 0.001
 iters = 50
 pso = PSO(P, I, D, -1.5, 1.5, 3, 50, iters)
+print("Otimizacao feita")
 Flag = False
 Export=True
 if(Export==True):
     with open(ExportToFile, 'a',newline='\n') as out:
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): # just one time to write the header of the CSV file
-            for i in range(0,iters)
+            for i in range(0,iters):
                 header= numpy.concatenate([i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]])
                 writer.writerow(header)
     out.close()
