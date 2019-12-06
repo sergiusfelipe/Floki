@@ -17,7 +17,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
 
     PID = [P, I, D]
     # PSO parameters
-    floki = floki_3.FLOKI(P, I, D)
+    floki = floki_3.FLOKI(P, I, D, samples=3)
     #    dim=30
     #    iters=200
     Vmax=6
@@ -94,7 +94,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
         #Update the W of PSO
         w=wMax-l*((wMax-wMin)/ite);
         
-        for i in range(0,PopSize):
+        for i in range(0,pop):
             for j in range (0,dim):
                 r1=random.random()
                 r2=random.random()

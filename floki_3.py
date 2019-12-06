@@ -18,10 +18,10 @@ int2 = 20
 int3 = 16
 int4 = 12
 
-GPIO.setup(self.int1, GPIO.OUT)
-GPIO.setup(self.int2, GPIO.OUT)
-GPIO.setup(self.int3, GPIO.OUT)
-GPIO.setup(self.int4, GPIO.OUT)
+GPIO.setup(int1, GPIO.OUT)
+GPIO.setup(int2, GPIO.OUT)
+GPIO.setup(int3, GPIO.OUT)
+GPIO.setup(int4, GPIO.OUT)
 
         # Pulse width modulation: a velocidade muda de acordo com o angulo
 PWM1 = GPIO.PWM(21, 100)
@@ -35,7 +35,7 @@ PWM2.start(0)
 PWM3.start(0)
 PWM4.start(0)
 
- def backward(velocity):
+def backward(velocity):
         PWM1.ChangeDutyCycle(velocity)
         GPIO.output(int2, GPIO.LOW)
         PWM3.ChangeDutyCycle(velocity)
@@ -157,18 +157,18 @@ class FLOKI:
                 print(PIDy)
                 if PIDy < -100:
                     PIDy = -100
-                self.backward(-float(PIDy))
+                backward(-float(PIDy))
                 #StepperFor(-PIDy)
             # Se PIDy > entao o sentido dos motores sera frente
             elif PIDy > 0.0:
                 print(PIDy)
                 if PIDy > 100:
                     PIDy = 100
-                self.forward(float(PIDy))
+                forward(float(PIDy))
                 #StepperBACK(PIDy)
             # E no caso de PIDy = 0 entao o robo esta em equilibrio 
             else:
-                self.equilibrium()
+                equilibrium()
 
             print((int(first_y), 'PID: ', int(PIDy)))
             last_pidy = PIDy
