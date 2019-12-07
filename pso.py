@@ -74,11 +74,13 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         for i in range(0,pop):
             teste_pop = time.time()
             #pos[i,:]=checkBounds(pos[i,:],lb,ub)
-            for j in range(dim):
-                pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])
+            '''for j in range(dim):
+                pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])'''
             #Calculate objective function for each particle
-#	    print(pos[i,:])
-            fitness = floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
+            print(pos[i,:])
+            #fitness = floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
+            floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
+            fitness = floki.IAE
     
             if(pBestScore[i]>fitness):
                 pBestScore[i]=fitness
@@ -154,7 +156,7 @@ if(Export==True):
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): # just one time to write the header of the CSV file
             for i in range(0,iters):
-                header= numpy.concatenate([i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]])
+                header= [i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]]
                 writer.writerow(header)
     out.close()
     Flag = True
@@ -166,7 +168,6 @@ sum =0
 while True:
     pi = time.time()
     floki.controle(P,I,D)
-
     delta_time = time.time() - pi
     sum += delta_time
     print('tempo medio de execucao: ',sum/i)
