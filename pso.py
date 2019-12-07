@@ -63,7 +63,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     #print("lb: ",lb)
     #print("ub: ",ub)
     #print("pos: ",pos)
-    i=1
+    f=1
     sum_ite =0
     for l in range(0,ite):
         teste_ite = time.time()
@@ -112,7 +112,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
                     vel[i,j]=-Vmax
                             
                 pos[i,j]=pos[i,j]+vel[i,j]
-            delta_vel = time.time() -delta_vel
+            delta_vel = time.time() - teste_vel
             sum_vel += delta_vel
             print("Execucao velocidade: ", sum_vel/h)
             h +=1
@@ -120,8 +120,8 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         convergence_curve[l]=gBestScore
         delta_ite = time.time() - teste_ite
         sum_ite += delta_ite
-        print("Execucao por iteracao: ", sum_ite/i)
-        i += 1
+        print("Execucao por iteracao: ", sum_ite/f)
+        f += 1
       
         if (l%1==0):
                print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(gBestScore)]);
@@ -142,9 +142,9 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 20
+iters = 1
 amost = 10
-'''pso = PSO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
+pso = PSO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
 print("Otimizacao feita")
 ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
@@ -165,12 +165,12 @@ i=1
 sum =0
 while True:
     pi = time.time()
-	IEA = floki.controle(P,I,D)
-	print(IEA)
+    floki.controle(P,I,D)
+
     delta_time = time.time() - pi
-	sum += delta_time
-	print('tempo medio de execucao: ',sum/i)
-	i+=1	
+    sum += delta_time
+    print('tempo medio de execucao: ',sum/i)
+    i+=1	
 if Flag == True:
     while True:
-        floki.controle(pso.kp, pso.ki, pso.kd)
+        floki.controle(pso.kp, pso.ki, pso.kd)'''

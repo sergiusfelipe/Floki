@@ -181,7 +181,7 @@ class FLOKI:
         return IAE
 
 
-floki = FLOKI(16.5,0.163,0.04075,1)
+'''floki = FLOKI(16.5,0.163,0.04075,1)
 teste = time.time()
 i=1
 sum =0
@@ -193,3 +193,4 @@ while True:
 	sum += delta_time
 	print('tempo medio de execucao: ',sum/i)
 	i+=1	
+'''
