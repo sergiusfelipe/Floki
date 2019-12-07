@@ -60,7 +60,7 @@ def equilibrium():
 
 class FLOKI:
 
-    def __init__(self, P, I, D):
+    def __init__(self, P, I, D, samples):
 
         # Inicializa o controlador
         self.pid = PID_3.PID(P, I, D)
@@ -71,6 +71,7 @@ class FLOKI:
         self.tempo = time.time()
         self.pid.Setpoint(3.5)
         self.pid.setSampleTime(0.1)
+        self.n_amostras = samples
         
         self.sensor = mpu6050(0x68)
         # K e K1 --> COnstantes para o Filtro Complementar de Shane Colton
@@ -119,7 +120,7 @@ class FLOKI:
         pi = self.pid.getCurrentTime()
         IAE = 0
         
-        for i in range(0,3):
+        for i in range(0,self.n_amostras):
             self.accel_data = self.sensor.get_accel_data()
             self.gyro_data = self.sensor.get_gyro_data()
 
@@ -148,6 +149,7 @@ class FLOKI:
             # Inicializando alguns parametros do controlador
             self.pid.update(self.last_y)
             PIDy = self.pid.output
+            print(self.pid.getKp(),self.pid.getKi(), self.pid.getKd())
 
             # Se PIDy < 0 entao o sentido dos motores sera de re
             if PIDy < 0.0:
