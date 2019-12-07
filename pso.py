@@ -12,22 +12,16 @@ import csv
 
 
 
-def PSO(P, I, D, lb,ub,dim,pop,ite):
+def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 
 
     PID = [P, I, D]
-    # PSO parameters
-    floki = floki_3.FLOKI(P, I, D)
-    #    dim=30
-    #    iters=200
+    floki = floki_3.FLOKI(P, I, D, samples)
     Vmax=6
-    #    PopSize=50     #population size
     wMax=0.9
     wMin=0.2
     c1=2
     c2=2
-    #    lb=-10
-    #    ub=10
     #    
     s=solution()
     if not isinstance(lb, list):
@@ -39,9 +33,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite):
         for i in range(dim):
             ub[i] = PID[i] - PID[i]*ub[i]
     
-    
-    ######################## Initializations
-    
+        
     vel=numpy.zeros((pop,dim))
     
     pBestScore=numpy.zeros(pop) 
@@ -131,7 +123,8 @@ P = 16.5
 I = 0.163
 D = 0.04075
 iters = 25
-pso = PSO(P, I, D, -0.25, 0.25, 3, 10, iters)
+amort = 10
+pso = PSO(P, I, D, -0.25, 0.25, 3, 10, iters, amost)
 print("Otimizacao feita")
 ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
