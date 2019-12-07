@@ -144,7 +144,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 1
+iters = 2
 amost = 10
 pso = PSO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
 print("Otimizacao feita")
@@ -152,7 +152,7 @@ ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv"
 Flag = False
 Export=True
 if(Export==True):
-    with open(ExportToFile, 'a',newline='\n') as out:
+    with open(ExportToFile, 'a') as out:
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): # just one time to write the header of the CSV file
             for i in range(0,iters):
