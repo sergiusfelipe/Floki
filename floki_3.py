@@ -60,7 +60,7 @@ def equilibrium():
 
 class FLOKI:
 
-    def __init__(self, P, I, D, samples):
+    def __init__(self, P, I, D):
 
         # Inicializa o controlador
         self.pid = PID_3.PID(P, I, D)
@@ -71,7 +71,6 @@ class FLOKI:
         self.tempo = time.time()
         self.pid.Setpoint(3.5)
         self.pid.setSampleTime(0.02)
-        self.n_amostras = samples
         
         self.sensor = mpu6050(0x68)
         # K e K1 --> COnstantes para o Filtro Complementar de Shane Colton
@@ -112,8 +111,8 @@ class FLOKI:
         radians = math.atan2(y, self.distance(x, z))
         return math.degrees(radians)   
 # O loop principal do algoritmo onde sera feita todo o o controle de equilibrio do robo
-    def controle(self, Kp, Ki, Kd):
-
+    def controle(self, Kp, Ki, Kd,samples):
+        self.n_amostras = samples
         self.pid.setKp(Kp)
         self.pid.setKi(Ki)
         self.pid.setKd(Kd)
