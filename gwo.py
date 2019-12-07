@@ -149,7 +149,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 1
+iters = 20
 amost = 10
 gwo = GWO(P, I, D, -0.1, 0.1, 3, 6, iters, amost)
 print("Otimizacao feita")
