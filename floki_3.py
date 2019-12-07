@@ -70,7 +70,7 @@ class FLOKI:
         t_f = 0
         self.tempo = time.time()
         self.pid.Setpoint(3.5)
-        self.pid.setSampleTime(0.1)
+        self.pid.setSampleTime(0.02)
         self.n_amostras = samples
         
         self.sensor = mpu6050(0x68)
@@ -78,7 +78,7 @@ class FLOKI:
         self.K = 0.98
         self.K1 = 1 - self.K
 
-        self.time_diff = 0.01
+        self.time_diff = 0.02
         # Requisita os dados do MPU6050 
         self.accel_data = self.sensor.get_accel_data()
         self.gyro_data = self.sensor.get_gyro_data()
@@ -117,7 +117,7 @@ class FLOKI:
         self.pid.setKp(Kp)
         self.pid.setKi(Ki)
         self.pid.setKd(Kd)
-        pi = self.pid.getCurrentTime()
+        pi = float(self.pid.getCurrentTime())
         IAE = 0
         
         for i in range(0,self.n_amostras):
@@ -153,14 +153,14 @@ class FLOKI:
 
             # Se PIDy < 0 entao o sentido dos motores sera de re
             if PIDy < 0.0:
-                print(PIDy)
+               
                 if PIDy < -100:
                     PIDy = -100
                 backward(-float(PIDy))
                 #StepperFor(-PIDy)
             # Se PIDy > entao o sentido dos motores sera frente
             elif PIDy > 0.0:
-                print(PIDy)
+               
                 if PIDy > 100:
                     PIDy = 100
                 forward(float(PIDy))
@@ -169,13 +169,27 @@ class FLOKI:
             else:
                 equilibrium()
 
-            print((int(first_y), 'PID: ', int(PIDy)))
+            print((int(self.last_y), 'PID: ', int(PIDy)))
             last_pidy = PIDy
             deltatime = self.pid.getCurrentTime() - pi
             IAE += abs(self.pid.getError())*deltatime
             pi = self.pid.getCurrentTime()
-            sleep(0.01)
+            sleep(0.0192)
             
         
 
         return IAE
+
+
+floki = FLOKI(16.5,0.163,0.04075,1)
+teste = time.time()
+i=1
+sum =0
+while True:
+	pi = time.time()
+	IAE = floki.controle(16.5,0.163,0.04075)
+	print('Indice IAE: ', IAE)
+	delta_time = time.time() - pi
+	sum += delta_time
+	print('tempo medio de execucao: ',sum/i)
+	i+=1	

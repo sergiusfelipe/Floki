@@ -123,8 +123,8 @@ P = 16.5
 I = 0.163
 D = 0.04075
 iters = 25
-amort = 10
-pso = PSO(P, I, D, -0.25, 0.25, 3, 10, iters, amost)
+amost = 10
+'''pso = PSO(P, I, D, -0.25, 0.25, 3, 10, iters, amost)
 print("Otimizacao feita")
 ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
@@ -138,7 +138,11 @@ if(Export==True):
                 writer.writerow(header)
     out.close()
     Flag = True
-
+'''
+floki = floki_3.FLOKI(P,I,D,amost)
+while True:
+	IEA = floki.controle(P,I,D)
+	print(IEA)
 if Flag == True:
     while True:
         floki.controle(pso.kp, pso.ki, pso.kd)
