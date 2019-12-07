@@ -46,6 +46,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     
     gBestScore=float("inf")
     iBestScore=float("inf")
+    last_gbest=float("inf")
 
     pos = numpy.zeros((pop, dim))
     for i in range(dim):
@@ -124,6 +125,12 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         print("Execucao por iteracao: ", sum_ite/f)
         f += 1
         iBestScore=float("inf")
+        if last_gbest == gBestScore:
+            kp_curve[l]=kp_curve[l-1]
+            ki_curve[l]=ki_curve[l-1]
+            kd_curve[l]=kd_curve[l-1]
+        
+        last_gbest = gBestScore
       
         if (l%1==0):
                print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(gBestScore)]);
@@ -144,7 +151,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 20
+iters = 2
 amost = 10
 pso = PSO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
 print("Otimizacao feita")
