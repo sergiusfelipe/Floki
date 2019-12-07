@@ -12,12 +12,6 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     
     PID = [P, I, D]
     floki = floki_3.FLOKI(P, I, D)
-
-    #Max_iter=1000
-    #lb=-100
-    #ub=100
-    #dim=30  
-    #SearchAgents_no=5
     
     # initialize alpha, beta, and delta_pos
     Alpha_pos=numpy.zeros(dim)
@@ -28,6 +22,9 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     
     Delta_pos=numpy.zeros(dim)
     Delta_score=float("inf")
+
+    iBest=numpy.zeros(dim)
+    iBestScore=float("inf")
 
     if not isinstance(lb, list):
         lb = [lb] * dim
@@ -59,14 +56,15 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     for l in range(0,ite):
         for i in range(0,SearchAgents_no):
             
-            # Return back the search agents that go beyond the boundaries of the search space
-            for j in range(dim):
-                pos[i,j]=numpy.clip(pos[i,j], lb[j], ub[j])
-
+            print(pos[i,:])
             # Calculate objective function for each search agent
             floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]),samples)
             fitness = floki.IAE
             
+            if(iBestScore>fitness):
+                iBestScore = fitness
+                iBest = pos[i,:].copy()
+
             # Update Alpha, Beta, and Delta
             if fitness<Alpha_score :
                 Alpha_score=fitness; # Update alpha
@@ -92,7 +90,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
         
         # Update the Position of search agents including omegas
         for i in range(0,SearchAgents_no):
-            floki.controle(kp_curve[l],ki_curve[l],kd_curve[l],1)
+            floki.controle(iBest[0],iBest[1],iBest[2],1)
             for j in range (0,dim):   
                            
                 r1=random.random() # r1 is a random number in [0,1]
@@ -127,10 +125,11 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
             
         
         
-        convergence_curve.append(Alpha_score);
+        convergence_curve[l]=Alpha_score
+        iBestScore=float("inf")
 
         if (l%1==0):
-            print(['At iteration '+ str(l)+ ' the best fitness is '+ str(Alpha_score)]);
+            print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(Alpha_score)]);
     
     timerEnd=time.time()  
     s.endTime=time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -150,9 +149,9 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 2
+iters = 1
 amost = 10
-gwo = GWO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
+gwo = GWO(P, I, D, -0.1, 0.1, 3, 6, iters, amost)
 print("Otimizacao feita")
 ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
