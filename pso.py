@@ -41,9 +41,11 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     
     pBest=numpy.zeros((pop,dim))
     gBest=numpy.zeros(dim)
+    iBest=numpy.zeros(dim)
     
     
     gBestScore=float("inf")
+    iBestScore=float("inf")
 
     pos = numpy.zeros((pop, dim))
     for i in range(dim):
@@ -54,15 +56,11 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     ki_curve=numpy.zeros(ite)
     kd_curve=numpy.zeros(ite)
     
-    ############################################
     print("PSO is optimizing Floki")    
     
     timerStart=time.time() 
     s.startTime=time.strftime("%Y-%m-%d-%H-%M-%S")
-    
-    #print("lb: ",lb)
-    #print("ub: ",ub)
-    #print("pos: ",pos)
+
     f=1
     sum_ite =0
     for l in range(0,ite):
@@ -73,15 +71,16 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         h = 1
         for i in range(0,pop):
             teste_pop = time.time()
-            #pos[i,:]=checkBounds(pos[i,:],lb,ub)
-            '''for j in range(dim):
-                pos[i, j] = numpy.clip(pos[i,j], lb[j], ub[j])'''
             #Calculate objective function for each particle
             print(pos[i,:])
-            #fitness = floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
             floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]),samples)
             fitness = floki.IAE
-    
+
+            if(iBestScore>fitness):
+                iBestScore=fitness
+                iBest = pos[i,:].copy()
+                
+
             if(pBestScore[i]>fitness):
                 pBestScore[i]=fitness
                 pBest[i,:]=pos[i,:].copy()
@@ -101,7 +100,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         
         for i in range(0,pop):
             teste_vel = time.time()
-            floki.controle(kp_curve[l],ki_curve[l],kd_curve[l],1)
+            floki.controle(iBest[0],iBest[1],iBest[2],1)
             for j in range (0,dim):
                 r1=random.random()
                 r2=random.random()
@@ -124,6 +123,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         sum_ite += delta_ite
         print("Execucao por iteracao: ", sum_ite/f)
         f += 1
+        iBestScore=float("inf")
       
         if (l%1==0):
                print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(gBestScore)]);
@@ -154,7 +154,7 @@ Export=True
 if(Export==True):
     with open(ExportToFile, 'a') as out:
         writer = csv.writer(out,delimiter=' ')
-        if (Flag==False): # just one time to write the header of the CSV file
+        if (Flag==False): 
             for i in range(0,iters):
                 header= [i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]]
                 writer.writerow(header)
