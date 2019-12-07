@@ -129,12 +129,12 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
         
         convergence_curve[l]=Alpha_score
         iBestScore=float("inf")
-        if last_gbest == gBestScore:
+        if last_gbest == Alpha_score:
             kp_curve[l]=kp_curve[l-1]
             ki_curve[l]=ki_curve[l-1]
             kd_curve[l]=kd_curve[l-1]
         
-        last_gbest = gBestScore
+        last_gbest = Alpha_score
 
         if (l%1==0):
             print(['At iteration '+ str(l+1)+ ' the best fitness is '+ str(Alpha_score)]);
@@ -157,7 +157,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 1
+iters = 50
 amost = 10
 gwo = GWO(P, I, D, -0.1, 0.1, 3, 6, iters, amost)
 print("Otimizacao feita")

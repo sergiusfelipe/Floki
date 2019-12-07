@@ -151,7 +151,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 2
+iters = 50
 amost = 10
 pso = PSO(P, I, D, -0.1, 0.1, 3, 10, iters, amost)
 print("Otimizacao feita")
