@@ -102,3 +102,12 @@ class PID:
 
     def getSetpoint(self):
         return self.SetPoint
+    
+    def getKp(self):
+        return self.Kp
+    
+    def getKi(self):
+        return self.Ki
+    
+    def getKd(self):
+        return self.Kd
