@@ -16,7 +16,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
 
 
     PID = [P, I, D]
-    floki = floki_3.FLOKI(P, I, D, samples)
+    floki = floki_3.FLOKI(P, I, D)
     Vmax=6
     wMax=0.9
     wMin=0.2
@@ -79,7 +79,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
             #Calculate objective function for each particle
             print(pos[i,:])
             #fitness = floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
-            floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]))
+            floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]),samples)
             fitness = floki.IAE
     
             if(pBestScore[i]>fitness):
@@ -101,7 +101,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
         
         for i in range(0,pop):
             teste_vel = time.time()
-            floki.controle(kp_curve[l],ki_curve[l],kd_curve[l])
+            floki.controle(kp_curve[l],ki_curve[l],kd_curve[l],1)
             for j in range (0,dim):
                 r1=random.random()
                 r2=random.random()
