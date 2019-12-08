@@ -4,8 +4,9 @@ import random as rand
 from operator import attrgetter
 import floki_3
 from solution import solution
-
+import time
 from food_source import FoodSource
+import csv
 
 
 class ABC(object):
@@ -13,7 +14,7 @@ class ABC(object):
 
     food_sources = []
 
-    def __init__(self, P, I, D, npopulation, nruns, trials_limit=50, employed_bees_percentage=0.5, lb, ub,dim,samples):
+    def __init__(self, P, I, D, npopulation, nruns, trials_limit, employed_bees_percentage, lb, ub,dim,samples):
         super(ABC, self).__init__()
 
         self.PID = [P, I, D]
@@ -28,16 +29,17 @@ class ABC(object):
         self.ki_curve=np.zeros(nruns)
         self.kd_curve=np.zeros(nruns)
         self.amostras = samples
+        self.bestGlobal = float("inf")
 
 
         if not isinstance(lb, list):
             self.lb = [lb] * dim
         for i in range(dim):
-            self.lb[i] = self.PID[i] - self.PID[i]*lb[i]
+            self.lb[i] = self.PID[i] - self.PID[i]*self.lb[i]
         if not isinstance(ub, list):
             self.ub = [ub] * dim
         for i in range(dim):
-            self.ub[i] = self.PID[i] - self.PID[i]*ub[i]
+            self.ub[i] = self.PID[i] - self.PID[i]*self.ub[i]
 
         self.employed_bees = round(npopulation * employed_bees_percentage)
         self.onlooker_bees = npopulation - self.employed_bees
@@ -45,24 +47,26 @@ class ABC(object):
     def optimize(self):
         self.initialize()
 
-        for nrun in range(1, self.nruns+1):
+        for nrun in range(0, self.nruns):
             self.employed_bees_stage()
             self.onlooker_bees_stage()
             self.scout_bees_stage()
-            self.kp_curve[nrun-1] = best_fs.solution[0]
-            self.ki_curve[nrun-1] = best_fs.solution[1]
-            self.kd_curve[nrun-1] = best_fs.solution[2]
-            self.convergence_curve[nrun-1] = best_fs.fitness
+            best_fs = self.best_source()
+            self.kp_curve[nrun] = best_fs.solution[0]
+            self.ki_curve[nrun] = best_fs.solution[1]
+            self.kd_curve[nrun] = best_fs.solution[2]
+            self.convergence_curve[nrun] = self.bestGlobal
 
         best_fs = self.best_source()
         self.s.optimizer="ABC"
         self.s.objfname="Floki"
-        self.s.kp_convergence = kp_curve
-        self.s.ki_convergence = ki_curve
-        self.s.kd_convergence = kd_curve
-        self.s.kp = kp_curve[-1]
-        self.s.ki = ki_curve[-1]
-        self.s.kd = kd_curve[-1]
+        self.s.convergence=self.convergence_curve
+        self.s.kp_convergence = self.kp_curve
+        self.s.ki_convergence = self.ki_curve
+        self.s.kd_convergence = self.kd_curve
+        self.s.kp = self.kp_curve[-1]
+        self.s.ki = self.ki_curve[-1]
+        self.s.kd = self.kd_curve[-1]
 
         return self.s
 
@@ -97,12 +101,12 @@ class ABC(object):
 
 
     def generate_solution(self, current_solution_index):
-        pos=np.zeros((self.npopulation, self.dim))
-        for i in range(self.dim):
+        pos=np.zeros((current_solution_index+1, self.dim))
+        for i in range(0, self.dim):
             
-            pos[:, i] = np.random.uniform(0,1, self.npopulation)
+            pos[:, i] = np.random.uniform(self.ub[i],self.lb[i], current_solution_index+1)
 
-        solution = pos[current_solution_index,:]
+        solution = pos[0,:] 
         return solution
 
     def random_solution_excluding(self, excluded_index):
@@ -114,10 +118,16 @@ class ABC(object):
         return selected
 
     def best_solution(self, current_solution, new_solution):
-        if self.fitness(new_solution) > self.fitness(current_solution):
-            return new_solution
+        current = self.fitness(current_solution)
+        new = self.fitness(new_solution)
+        if new > current:
+                if self.bestGlobal > current:
+                        self.bestGlobal = current
+                return current_solution
         else:
-            return current_solution
+                if self.bestGlobal > new:
+                        self.bestGlobal = new
+                return new_solution
 
     def probability(self, solution_fitness):
         fitness_sum = sum([fs.fitness for fs in self.food_sources])
@@ -126,10 +136,10 @@ class ABC(object):
         return probability
 
     def fitness(self, solution):
-
-        fitness = self.floki.controle(solution[0], solution[1], solution[2], self.amostras)
-
-        return fitness
+        self.floki.controle(solution[0], solution[1], solution[2], self.amostras)
+        fitness = self.floki.IAE
+        print(fitness)
+        return float(fitness)
 
     def selection(self, solutions, weights):
         return rand.choices(solutions, weights)[0]
@@ -157,11 +167,12 @@ class ABC(object):
 P = 16.5
 I = 0.163
 D = 0.04075
-iters = 5
+iters = 50
 amost = 5
 abc = ABC(P, I, D,10,iters,50,0.5, -0.1, 0.1, 3, amost)
 solution = abc.optimize()
 print("Otimizacao feita")
+print(solution.convergence)
 ExportToFile="experiment"+time.strftime("%Y-%m-%d-%H-%M-%S")+".csv" 
 Flag = False
 Export=True
@@ -169,8 +180,8 @@ if(Export==True):
     with open(ExportToFile, 'a') as out:
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): 
-            for i in range(0,iters):
-                header= [i,solution.kp_convergence[i], solution.ki_convergence[i], solution.kd_convergence[i], solution.convergence[i]]
+            for k in range(0,iters):
+                header= [k,solution.kp_convergence[k], solution.ki_convergence[k], solution.kd_convergence[k], solution.convergence[k]]
                 writer.writerow(header)
     out.close()
     Flag = True
