@@ -45,6 +45,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     
     
     gBestScore=float("inf")
+    bestVar=float("inf")
     iBestScore=float("inf")
     last_gbest=float("inf")
 
@@ -56,6 +57,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     kp_curve=numpy.zeros(ite)
     ki_curve=numpy.zeros(ite)
     kd_curve=numpy.zeros(ite)
+    var_curve=numpy.zeros(ite)
     
     print("PSO is optimizing Floki")    
     
@@ -76,6 +78,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
             print(pos[i,:])
             floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]),samples)
             fitness = floki.IAE
+            var = floki.var
 
             if(iBestScore>fitness):
                 iBestScore=fitness
@@ -89,6 +92,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
             if(gBestScore>fitness):
                 gBestScore=fitness
                 gBest=pos[i,:].copy()
+                bestVar=var
                 kp_curve[l]=pos[i,0]
                 ki_curve[l]=pos[i,1]
                 kd_curve[l]=pos[i,2]
@@ -120,6 +124,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
             h +=1
         
         convergence_curve[l]=gBestScore
+        var_curve[l]=bestVar
         delta_ite = time.time() - teste_ite
         sum_ite += delta_ite
         print("Execucao por iteracao: ", sum_ite/f)
@@ -146,6 +151,7 @@ def PSO(P, I, D, lb,ub,dim,pop,ite, samples):
     s.kp = kp_curve[-1]
     s.ki = ki_curve[-1]
     s.kd = kd_curve[-1]
+    s.var = var_curve
 
     return s
 P = 16.5
@@ -163,7 +169,7 @@ if(Export==True):
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): 
             for i in range(0,iters):
-                header= [i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i]]
+                header= [i,pso.kp_convergence[i], pso.ki_convergence[i], pso.kd_convergence[i], pso.convergence[i],pso.var[i]]
                 writer.writerow(header)
     out.close()
     Flag = True
