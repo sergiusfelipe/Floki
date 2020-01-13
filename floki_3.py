@@ -118,6 +118,7 @@ class FLOKI:
         self.pid.setKd(Kd)
         pi = float(self.pid.getCurrentTime())
         self.IAE = 0
+        self.var = 0
         
         for i in range(0,self.n_amostras):
             self.accel_data = self.sensor.get_accel_data()
@@ -172,8 +173,10 @@ class FLOKI:
             last_pidy = PIDy
             deltatime = self.pid.getCurrentTime() - pi
             self.IAE += abs(self.pid.getError())*deltatime
+            self.var += (self.last_y-self.pid.getSetpoint())**2
             pi = self.pid.getCurrentTime()
             sleep(0.0192)
+        self.var = self.var/self.n_amostras
             
 
 
