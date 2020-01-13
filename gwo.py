@@ -27,6 +27,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     iBestScore=float("inf")
 
     last_gbest=float("inf")
+    bestVar=float("inf")
 
     if not isinstance(lb, list):
         lb = [lb] * dim
@@ -47,6 +48,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     kp_curve=numpy.zeros(ite)
     ki_curve=numpy.zeros(ite)
     kd_curve=numpy.zeros(ite)
+    var_curve=numpy.zeros(ite)
     s=solution()
 
      # Loop counter
@@ -62,6 +64,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
             # Calculate objective function for each search agent
             floki.controle(float(pos[i,0]),float(pos[i,1]),float(pos[i,2]),samples)
             fitness = floki.IAE
+            var = floki.var
             
             if(iBestScore>fitness):
                 iBestScore=fitness
@@ -74,6 +77,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
                 kp_curve[l]=pos[i,0]
                 ki_curve[l]=pos[i,1]
                 kd_curve[l]=pos[i,2]
+                bestVar=var
             
             
             if (fitness>Alpha_score and fitness<Beta_score ):
@@ -128,6 +132,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
         
         
         convergence_curve[l]=Alpha_score
+        var_curve[l]=bestVar
         iBestScore=float("inf")
         if last_gbest == Alpha_score:
             kp_curve[l]=kp_curve[l-1]
@@ -151,6 +156,7 @@ def GWO(P, I, D, lb, ub, dim, SearchAgents_no,ite,samples):
     s.kp = kp_curve[-1]
     s.ki = ki_curve[-1]
     s.kd = kd_curve[-1]
+    s.var = var_curve
 
     return s
     
