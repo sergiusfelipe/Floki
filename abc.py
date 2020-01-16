@@ -71,6 +71,7 @@ class ABC(object):
         self.s.kp = self.kp_curve[-1]
         self.s.ki = self.ki_curve[-1]
         self.s.kd = self.kd_curve[-1]
+        self.s.var = self.var_curve
 
         return self.s
 
@@ -195,7 +196,7 @@ if(Export==True):
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): 
             for k in range(0,iters):
-                header= [k,solution.kp_convergence[k], solution.ki_convergence[k], solution.kd_convergence[k], solution.convergence[k]]
+                header= [k,solution.kp_convergence[k], solution.ki_convergence[k], solution.kd_convergence[k], solution.convergence[k],solution.var([k]]
                 writer.writerow(header)
     out.close()
     Flag = True
