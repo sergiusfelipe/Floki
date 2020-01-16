@@ -175,7 +175,7 @@ if(Export==True):
         writer = csv.writer(out,delimiter=' ')
         if (Flag==False): # just one time to write the header of the CSV file
             for i in range(0,iters):
-                header= [i,gwo.kp_convergence[i], gwo.ki_convergence[i], gwo.kd_convergence[i], gwo.convergence[i]]
+                header= [i,gwo.kp_convergence[i], gwo.ki_convergence[i], gwo.kd_convergence[i], gwo.convergence[i], gwo.var[i]]
                 writer.writerow(header)
     out.close()
     Flag = True
