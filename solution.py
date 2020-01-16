@@ -13,3 +13,10 @@ class solution:
         self.dim=0
         self.popnum=0
         self.maxiers=0
+        self.kp=0
+        self.ki=0
+        self.kd=0
+        self.kp_convergence = []
+        self.ki_convergence = []
+        self.kd_convergence = []
+        self.var = []
