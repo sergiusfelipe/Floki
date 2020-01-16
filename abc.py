@@ -28,8 +28,13 @@ class ABC(object):
         self.kp_curve=np.zeros(nruns)
         self.ki_curve=np.zeros(nruns)
         self.kd_curve=np.zeros(nruns)
+        self.var_curve=np.zeros(nruns)
         self.amostras = samples
         self.bestGlobal = float("inf")
+        self.bestKp = float("inf")
+        self.bestKi = float("inf")
+        self.bestKd = float("inf")
+        self.best_var = float("inf")
 
 
         if not isinstance(lb, list):
@@ -51,13 +56,12 @@ class ABC(object):
             self.employed_bees_stage()
             self.onlooker_bees_stage()
             self.scout_bees_stage()
-            best_fs = self.best_source()
-            self.kp_curve[nrun] = best_fs.solution[0]
-            self.ki_curve[nrun] = best_fs.solution[1]
-            self.kd_curve[nrun] = best_fs.solution[2]
+            self.kp_curve[nrun] = self.bestKp
+            self.ki_curve[nrun] = self.bestKi
+            self.kd_curve[nrun] = self.bestKd
+            self.var_curve[nrun] = self.best_var
             self.convergence_curve[nrun] = self.bestGlobal
 
-        best_fs = self.best_source()
         self.s.optimizer="ABC"
         self.s.objfname="Floki"
         self.s.convergence=self.convergence_curve
@@ -119,14 +123,24 @@ class ABC(object):
 
     def best_solution(self, current_solution, new_solution):
         current = self.fitness(current_solution)
+        var_current = self.floki.var
         new = self.fitness(new_solution)
+        var_new = self.floki.var
         if new > current:
                 if self.bestGlobal > current:
                         self.bestGlobal = current
+                        self.bestKp = current_solution[0]
+                        self.bestKi = current_solution[1]
+                        self.bestKd = current_solution[2]
+                        self.best_var = var_current
                 return current_solution
         else:
                 if self.bestGlobal > new:
                         self.bestGlobal = new
+                        self.bestKp = new_solution[0]
+                        self.bestKi = new_solution[1]
+                        self.bestKd = new_solution[2]
+                        self.best_var = var_new
                 return new_solution
 
     def probability(self, solution_fitness):
@@ -185,5 +199,3 @@ if(Export==True):
                 writer.writerow(header)
     out.close()
     Flag = True
-
-    
